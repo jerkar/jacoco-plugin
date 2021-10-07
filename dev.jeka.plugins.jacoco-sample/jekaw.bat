@@ -1,0 +1,1 @@
+..\dev.jeka.plugins.jacoco\jekaw %*

@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/dev.jeka.plugins.protobuf/dev.jeka.plugins.protobuf.iml" filepath="$PROJECT_DIR$/dev.jeka.plugins.protobuf/dev.jeka.plugins.protobuf.iml" />
-      <module fileurl="file://$PROJECT_DIR$/dev.jeka.plugins.protobuf-sample/dev.jeka.plugins.protobuf-sample.iml" filepath="$PROJECT_DIR$/dev.jeka.plugins.protobuf-sample/dev.jeka.plugins.protobuf-sample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev.jeka.plugins.jacoco/dev.jeka.plugins.jacoco.iml" filepath="$PROJECT_DIR$/dev.jeka.plugins.jacoco/dev.jeka.plugins.jacoco.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev.jeka.plugins.jacoco-sample/dev.jeka.plugins.jacoco-sample.iml" filepath="$PROJECT_DIR$/dev.jeka.plugins.jacoco-sample/dev.jeka.plugins.jacoco-sample.iml" />
     </modules>
   </component>
 </project>
