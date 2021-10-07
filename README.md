@@ -45,14 +45,3 @@ See example [here](dev.jeka.plugins.jacoco-sample)
 
 This project uses Jeka wrapper, you don't need to have Jeka installed on your machine. simply execute `./jekaw cleanPack`
 from the root of this project.
-
-
-
-
- 
-
-
-
-
-
-
