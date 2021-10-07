@@ -1,60 +1,44 @@
-![Build Status](https://github.com/jerkar/protobuf-plugin/actions/workflows/push-master.yml/badge.svg)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.jeka/protobuf-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.jeka/protobuf-plugin) <br/>
+![Build Status](https://github.com/jerkar/jacoco-plugin/actions/workflows/push-master.yml/badge.svg)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/dev.jeka/jacoco-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/dev.jeka/protobuf-plugin) <br/>
 
-# Jeka library/plugin for Protobuf
+# Jeka library/plugin for Jacoco
 
-This provides a plugin to use the [protobuf](https://developers.google.com/protocol-buffers/) compiler in your Java builds
+Plugin to use the [Jacoco](https://www.eclemma.org/jacoco) coverage tool in your Java builds
 
 ## How to use
- 
-This plugin no longer requires to have `protoc` installed on the host machine.
 
-Just declare the plugin and put protobuf files under `src/main/proto`.  
+Just declare the plugin in your build class.  
 
 ```java
 @JkDefClasspath("dev.jeka.plugins:protobuf:[version]")
-public class Build extends JkCommandSet {
+public class Build extends JkClass {
     
     JkPluginJava javaPlugin = getPlugin(JkPluginJava.class);
     
-    JkPluginProtobuf protobufPlugin = getPlugin(JkPluginProtobuf.class);
+    JkPluginJacoco jacoco = getPlugin(JkPluginJacoco.class);
 
     ...
 }
 ```
-The Java source files will be generated automatically prior compiling Java sources and 
- _com.google.protobuf:protobuf-java_ library will be added to project dependency. 
+The plugin will configure java project in such tests are launched with jacoco agent. 
+Jacoco reports are output in output/jacoco dir.
 
 ### Programmatically
 
-You can use the protocol Buffer wrapper programmatically as a vanilla library using 
-static method `dev.jeka.plugins.protobuf.JkProtobuf#compile` method. 
+You can use directly `JkJacoco` in build code to perform lower level actions.
 
-### Command line only
+### Bind Jacoco dynamically
 
-You can invoke this plugin from command line on a Jeka project that does not declare it.
+You can invoke Jacoco plugin from command line on a Jeka project that does declare this plugin in its build class.
 
-To compile .poto files
-`jeka @dev.jeka.plugins:protobuf:[version] protobuf#compile`
-or `jeka protobuf#compile` if you have annoted a def class with `@JkDefClasspath` annotation.
+`jeka @dev.jeka.plugins:jacoco:[version] jacoco# java#pack`
 
 To get help and options :
-`jeka protobuf#compile`
+`jeka jacoco#help`
 
-### Using with JkPluginJava
+### Example
 
-The most common usage is to use it along Jeka `java` plugin. For such you only have to :
-
-* declare the plugin as shown below
-* append _com.google.protobuf:protobuf-java_ library to project dependencies
-* update your IDE metadata `jeka intellij#iml`
-* that's all !
-
-See example [here](dev.jeka.plugins.protobuf-sample)
-
-The plugin takes care to : 
-* add a pre-compilation task for generating .java files in _jeka/output/geneated_sources/java_. _.proto_ source files are supposed to lie in _src/main/protobuf_.
-* append _com.google.protobuf:protobuf-java_ library to project dependencies.
+See example [here](dev.jeka.plugins.jacoco-sample)
 
 
 ## How to build this project
