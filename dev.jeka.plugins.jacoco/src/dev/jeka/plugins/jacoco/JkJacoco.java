@@ -6,7 +6,6 @@ import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
-import dev.jeka.core.tool.builtins.jacoco.JkPluginJacoco;
 
 import java.net.URL;
 import java.nio.file.Files;
