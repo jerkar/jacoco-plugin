@@ -1,15 +1,20 @@
 package dev.jeka.plugins.jacoco;
 
+import dev.jeka.core.api.file.JkPathMatcher;
+import dev.jeka.core.api.file.JkPathTree;
 import dev.jeka.core.api.java.JkInternalClassloader;
 import dev.jeka.core.api.java.JkJavaProcess;
 import dev.jeka.core.api.java.testing.JkTestProcessor;
 import dev.jeka.core.api.system.JkLog;
 import dev.jeka.core.api.utils.JkUtilsIO;
 import dev.jeka.core.api.utils.JkUtilsObject;
+import dev.jeka.core.api.utils.JkUtilsPath;
+import dev.jeka.core.api.utils.JkUtilsString;
 
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +24,11 @@ import java.util.List;
  *
  * Note : May sometime fall in this issue when running from IDE :
  * https://stackoverflow.com/questions/31720139/jacoco-code-coverage-report-generator-showing-error-classes-in-bundle-code-c
+ *
+ * See command-line documentation :
+ * https://www.jacoco.org/jacoco/trunk/doc/cli.html
+ * https://www.jacoco.org/jacoco/trunk/doc/agent.html
+ *
  */
 public final class JkJacoco {
 
@@ -27,6 +37,8 @@ public final class JkJacoco {
     private Path execFile;
 
     private Path classDir;
+
+    private JkPathMatcher classDirFilter;
 
     private final List<String> agentOptions = new LinkedList<>();
 
@@ -62,6 +74,11 @@ public final class JkJacoco {
         return this;
     }
 
+    public JkJacoco setClassDirFilter(JkPathMatcher pathMatcher) {
+        this.classDirFilter = pathMatcher;
+        return this;
+    }
+
     /**
      * See https://www.jacoco.org/jacoco/trunk/doc/cli.html for report option
      */
@@ -76,9 +93,11 @@ public final class JkJacoco {
 
     public void configure(JkTestProcessor testProcessor) {
         testProcessor.getPreActions().append(() -> {
+            String agentOptions = agentOptions();
             JkJavaProcess process = JkUtilsObject.firstNonNull(testProcessor.getForkingProcess(),
                     JkJavaProcess.ofJava(JkTestProcessor.class.getName()));
-            process.addAgent(agent, agentOptions());
+            process.addAgent(agent, agentOptions);
+            JkLog.info("Instrumenting tests with Jacoco agent " + agentOptions);
             testProcessor.setForkingProcess(process);
             testProcessor.getPostActions().append(new Reporter());
         });
@@ -86,15 +105,17 @@ public final class JkJacoco {
     }
 
     private String agentOptions() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("destfile=").append(execFile.toAbsolutePath());
-        if (Files.exists(execFile)) {
-            builder.append(",append=true");
+        String result = String.join(",", agentOptions);
+        boolean hasDestFile = agentOptions.stream()
+                .filter(option -> option.startsWith("destfile="))
+                .findFirst().isPresent();
+        if (!hasDestFile) {
+            if (!JkUtilsString.isBlank(result)) {
+                result = result + ",";
+            }
+            result = result + "destfile=" + JkUtilsPath.relativizeFromWorkingDir(execFile);
         }
-        for (final String option : agentOptions) {
-            builder.append(",").append(option);
-        }
-        return builder.toString();
+        return result;
     }
 
     private class Reporter implements Runnable {
@@ -111,21 +132,35 @@ public final class JkJacoco {
                     JkLog.warn("File " + execFile + " not found. Cannot run jacoco report.");
                     return;
                 }
+                JkPathTree pathTree = null;
+                if (classDirFilter != null) {
+                    pathTree = JkPathTree.of(classDir).withMatcher(classDirFilter);
+                }
                 final URL cliJarUrl = JkPluginJacoco.class.getResource("org.jacoco.cli-0.8.7-nodeps.jar");
                 final Path cliJarFile = JkUtilsIO.copyUrlContentToCacheFile(cliJarUrl, System.out,
                         JkInternalClassloader.URL_CACHE_DIR);
                 List<String> args = new LinkedList<>();
                 args.add("report");
-                args.add(execFile.toAbsolutePath().toString());
-                args.add("--classfiles");
-                args.add(classDir.toString());
+                args.add(execFile.toString());
+                if (classDirFilter == null) {
+                    args.add("--classfiles");
+                    args.add(classDir.toString());
+                } else {
+                    pathTree.getFiles().forEach(file ->  {
+                        args.add("--classfiles");
+                        args.add(file.toString());
+                    });
+                }
                 args.add("--encoding");
                 args.add("utf-8");
                 args.addAll(reportOptions);
+                if (!JkLog.isVerbose()) {
+                    args.add("--quiet");
+                }
                 JkLog.info("Generate Jacoco report");
                 JkJavaProcess.ofJavaJar(cliJarFile, null)
                         .setFailOnError(true)
-                        .setLogCommand(true)
+                        .setLogCommand(JkLog.isVerbose())
                         .addParams(args)
                         .exec();
             }
