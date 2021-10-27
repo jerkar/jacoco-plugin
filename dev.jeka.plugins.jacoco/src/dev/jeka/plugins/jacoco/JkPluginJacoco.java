@@ -8,8 +8,7 @@ import dev.jeka.core.tool.JkDoc;
 import dev.jeka.core.tool.JkDocPluginDeps;
 import dev.jeka.core.tool.JkPlugin;
 import dev.jeka.core.tool.builtins.java.JkPluginJava;
-
-import java.util.Arrays;
+import dev.jeka.core.tool.builtins.repos.JkPluginRepo;
 
 @JkDoc("Run unit tests with Jacoco agent coverage test tool.")
 @JkDocPluginDeps(JkPluginJava.class)
@@ -38,8 +37,9 @@ public class JkPluginJacoco extends JkPlugin {
     @JkDoc("Exclusion patterns separated with ',' to exclude some class files from the XML report input. An example is 'META-INF/**/*.jar'.")
     public String classDirExcludes;
 
-    @JkDoc("Configures java plugin in order unit tests are run with Jacoco coverage tool. Result is located in [OUTPUT DIR]/"
-            + OUTPUT_RELATIVE_PATH + " file.")
+    @JkDoc("Version of Jacoco to use both for agent and report.")
+    public String jacocoVersion = "0.8.7";
+
     @Override
     protected void afterSetup() {
         if (!enabled) {
@@ -47,9 +47,14 @@ public class JkPluginJacoco extends JkPlugin {
         }
         JkPluginJava pluginJava = getJkClass().getPlugins().get(JkPluginJava.class);
         final JkJavaProject project = pluginJava.getProject();
-        final JkJacoco jacoco = JkJacoco
-                .of(project.getOutputDir().resolve(OUTPUT_RELATIVE_PATH))
-                .setClassDir(project.getConstruction().getCompilation().getLayout().getClassDirPath());
+        final JkJacoco jacoco;
+        if (JkUtilsString.isBlank(jacocoVersion)) {
+            jacoco = JkJacoco.ofEmbedded();
+        } else {
+            jacoco = JkJacoco.ofManaged(project.getConstruction().getDependencyResolver(), jacocoVersion);
+        }
+        jacoco.setExecFile(project.getOutputDir().resolve(OUTPUT_RELATIVE_PATH))
+            .setClassDir(project.getConstruction().getCompilation().getLayout().getClassDirPath());
         if (xmlReport) {
             jacoco.addReportOptions("--xml",
                     project.getOutputDir().resolve(OUTPUT_XML_RELATIVE_PATH).toString());

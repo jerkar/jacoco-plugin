@@ -17,6 +17,7 @@ class Build extends JkClass {
     protected void setup() {
         jacoco.enabled = true;
         jacoco.xmlReport = true;
+        jacoco.jacocoVersion = "0.8.7";
         springboot.setSpringbootVersion("2.5.5");
         springboot.javaPlugin().getProject().simpleFacade()
             .setCompileDependencies(deps -> deps
