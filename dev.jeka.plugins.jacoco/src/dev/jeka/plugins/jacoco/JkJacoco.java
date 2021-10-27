@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Enhancer to beforeOptionsInjected JkUnit such it performs Jacoco code coverage while it runs unit tests.
+ * Provides convenient methods to deal with Jacoco agent and report tool.
  *
  * Note : May sometime fall in this issue when running from IDE :
  * https://stackoverflow.com/questions/31720139/jacoco-code-coverage-report-generator-showing-error-classes-in-bundle-code-c
